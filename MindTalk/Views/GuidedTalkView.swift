@@ -93,8 +93,9 @@ struct GuidedTalkView: View {
                     } else {
                         Text(speechService.transcript)
                             .font(.body)
-                            .opacity(Double(speechService.currentWordConfidence))
-                            .animation(.easeInOut(duration: 0.3), value: speechService.currentWordConfidence)
+                            .foregroundColor(.primary)
+                            .opacity(Double(max(0.7, speechService.currentWordConfidence)))
+                            .animation(.easeInOut(duration: 0.3), value: speechService.currentWordConfidence) y7jt6hgr54efxdw3s2qza;
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -136,14 +137,20 @@ struct GuidedTalkView: View {
                         finishSession()
                     }) {
                         VStack(spacing: 5) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.title)
-                                .foregroundColor(.green)
-                            Text("Finish")
+                            if appViewModel.isProcessingAI {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.title)
+                                    .foregroundColor(.green)
+                            }
+                            Text(appViewModel.isProcessingAI ? "Processing..." : "Finish")
                                 .font(.caption)
                                 .foregroundColor(.green)
                         }
                     }
+                    .disabled(appViewModel.isProcessingAI)
                     
                     // Main record/pause button
                     Button(action: {
@@ -240,12 +247,14 @@ struct GuidedTalkView: View {
     }
     
     private func finishSession() {
-        stopSession()
-        
-        // Save transcript to current session
-        appViewModel.currentSession?.transcript = speechService.transcript
+        // Save transcript to current session BEFORE stopping
+        let finalTranscript = speechService.transcript
+        appViewModel.currentSession?.transcript = finalTranscript
         appViewModel.currentSession?.duration = 300 - timeRemaining
         
+        print("💾 Saving session with transcript: '\(finalTranscript)'")
+        
+        stopSession()
         appViewModel.completeSession()
     }
     

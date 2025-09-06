@@ -8,6 +8,7 @@ enum AppView {
     case summary
     case reflection
     case weeklyReview
+    case calendar
 }
 
 @MainActor
@@ -15,8 +16,11 @@ class AppViewModel: ObservableObject {
     @Published var currentView: AppView = .start
     @Published var currentSession: CheckInSession?
     @Published var userSettings: UserSettings?
+    @Published var isProcessingAI = false
+    @Published var aiProcessingError: String = ""
     
     private var viewContext: NSManagedObjectContext?
+    private let openAIService = OpenAIService()
     
     func initializeApp(context: NSManagedObjectContext) {
         self.viewContext = context
@@ -78,12 +82,84 @@ class AppViewModel: ObservableObject {
         guard let context = viewContext,
               let session = currentSession else { return }
         
+        // Save the basic session first
         do {
             try context.save()
             updateStreak()
-            currentView = .summary
         } catch {
             print("Error saving session: \(error)")
+            return
+        }
+        
+        // Process with AI if we have a transcript
+        if let transcript = session.transcript, !transcript.isEmpty {
+            Task {
+                await processSessionWithAI(session: session, transcript: transcript)
+                currentView = .summary
+            }
+        } else {
+            currentView = .summary
+        }
+    }
+    
+    private func processSessionWithAI(session: CheckInSession, transcript: String) async {
+        isProcessingAI = true
+        aiProcessingError = ""
+        
+        let energyLevel = Int(session.energyLevel)
+        let intent = session.intent ?? "general"
+        
+        if let analysis = await openAIService.analyzeSession(
+            transcript: transcript,
+            energyLevel: energyLevel,
+            intent: intent
+        ) {
+            await updateSessionWithAnalysis(session: session, analysis: analysis)
+        } else {
+            aiProcessingError = openAIService.lastError
+        }
+        
+        isProcessingAI = false
+    }
+    
+    private func updateSessionWithAnalysis(session: CheckInSession, analysis: SessionAnalysis) async {
+        guard let context = viewContext else { return }
+        
+        // Update session with AI analysis
+        session.summary = analysis.summary
+        session.coreTheme = analysis.coreTheme
+        
+        // Create emotion entities
+        for emotionData in analysis.emotions {
+            let emotion = Emotion(context: context)
+            emotion.name = emotionData.name
+            emotion.intensity = emotionData.intensity
+            emotion.color = emotionData.color
+            emotion.session = session
+        }
+        
+        // Create action entities
+        for actionData in analysis.actions {
+            let action = Action(context: context)
+            action.title = actionData.title
+            action.category = actionData.category
+            action.dueTime = actionData.dueTime
+            action.isSpecific = actionData.isSpecific
+            action.isMeasurable = actionData.isMeasurable
+            action.isAchievable = actionData.isAchievable
+            action.isRelevant = actionData.isRelevant
+            action.isTimeBound = actionData.isTimeBound
+            action.isCompleted = false
+            action.session = session
+        }
+        
+        // Save the processed session
+        do {
+            try context.save()
+            print("💾 Session processed with AI analysis successfully")
+        } catch {
+            print("Error saving processed session: \(error)")
+            aiProcessingError = "Failed to save AI analysis: \(error.localizedDescription)"
         }
     }
     
@@ -130,5 +206,9 @@ class AppViewModel: ObservableObject {
     
     func showWeeklyReview() {
         currentView = .weeklyReview
+    }
+    
+    func showCalendar() {
+        currentView = .calendar
     }
 }

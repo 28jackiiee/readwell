@@ -1,0 +1,50 @@
+# Ignore build artifacts
+build/
+*.xcworkspace
+*.xcodeproj
+.env
+
+# Ignore Swift Package Manager artifacts
+.swiftpm/
+Package.resolved
+
+# Ignore user-specific settings
+*.xcuserstate
+*.xcuserdata/
+
+# Ignore derived data
+DerivedData/
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Pods directory
+Pods/
+
+# Ignore Carthage build directory
+Carthage/Build/
+
+# Ignore fastlane specific files
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+
+# Ignore any other generated files
+*.generated.swift
+*.hmap
+*.modulemap
+
+# Ignore any backup files
+*.bak
+*.swp
+*.swo
+*.old
+*.orig

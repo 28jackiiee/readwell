@@ -24,6 +24,7 @@
 		2B1234567890ABF7 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1234567890ABF8 /* NotificationService.swift */; };
 		2B1234567890ABF9 /* PDFExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1234567890ABFA /* PDFExportService.swift */; };
 		2B1234567890ABFB /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1234567890ABFC /* Constants.swift */; };
+		2B1234567890ABFD /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1234567890ABFE /* CalendarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		2B1234567890ABF8 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		2B1234567890ABFA /* PDFExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExportService.swift; sourceTree = "<group>"; };
 		2B1234567890ABFC /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		2B1234567890ABFE /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				2B1234567890ABEC /* SummaryView.swift */,
 				2B1234567890ABEE /* ReflectionView.swift */,
 				2B1234567890ABF0 /* WeeklyReviewView.swift */,
+				2B1234567890ABFE /* CalendarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 				2B1234567890ABF7 /* NotificationService.swift in Sources */,
 				2B1234567890ABF9 /* PDFExportService.swift in Sources */,
 				2B1234567890ABFB /* Constants.swift in Sources */,
+				2B1234567890ABFD /* CalendarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

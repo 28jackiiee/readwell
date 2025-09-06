@@ -24,6 +24,9 @@ struct ContentView: View {
                 case .weeklyReview:
                     WeeklyReviewView()
                         .environmentObject(appViewModel)
+                case .calendar:
+                    CalendarView()
+                        .environmentObject(appViewModel)
                 }
             }
         }

@@ -133,6 +133,25 @@ struct StartView: View {
                 .cornerRadius(16)
             }
             .padding(.horizontal)
+            
+            // Calendar access button
+            Button(action: {
+                appViewModel.showCalendar()
+            }) {
+                HStack {
+                    Image(systemName: "calendar")
+                        .font(.title3)
+                    Text("View Calendar")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.blue)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(12)
+            }
+            .padding(.horizontal)
             .padding(.bottom, 50)
         }
         .background(
