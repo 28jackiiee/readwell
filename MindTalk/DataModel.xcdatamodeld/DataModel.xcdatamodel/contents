@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22522" systemVersion="23A344" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CheckInSession" representedClassName="CheckInSession" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="transcript" optional="YES" attributeType="String"/>
+        <attribute name="summary" optional="YES" attributeType="String"/>
+        <attribute name="energyLevel" optional="YES" attributeType="Integer 16" defaultValue="5" usesScalarValueType="YES"/>
+        <attribute name="intent" optional="YES" attributeType="String"/>
+        <attribute name="coreTheme" optional="YES" attributeType="String"/>
+        <attribute name="duration" optional="YES" attributeType="Double" defaultValue="0.0" usesScalarValueType="YES"/>
+        <relationship name="emotions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Emotion" inverseName="session" inverseEntity="Emotion"/>
+        <relationship name="actions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Action" inverseName="session" inverseEntity="Action"/>
+    </entity>
+    <entity name="Emotion" representedClassName="Emotion" syncable="YES" codeGenerationType="class">
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="intensity" optional="NO" attributeType="Double" minValueString="0" maxValueString="10" defaultValue="5" usesScalarValueType="YES"/>
+        <attribute name="color" optional="YES" attributeType="String"/>
+        <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CheckInSession" inverseName="emotions" inverseEntity="CheckInSession"/>
+    </entity>
+    <entity name="Action" representedClassName="Action" syncable="YES" codeGenerationType="class">
+        <attribute name="title" optional="NO" attributeType="String"/>
+        <attribute name="isCompleted" optional="NO" attributeType="Boolean" defaultValue="NO" usesScalarValueType="YES"/>
+        <attribute name="dueTime" optional="YES" attributeType="String"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="isSpecific" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <attribute name="isMeasurable" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <attribute name="isAchievable" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <attribute name="isRelevant" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <attribute name="isTimeBound" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CheckInSession" inverseName="actions" inverseEntity="CheckInSession"/>
+    </entity>
+    <entity name="WeeklyReview" representedClassName="WeeklyReview" syncable="YES" codeGenerationType="class">
+        <attribute name="weekStartDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="completionPercentage" optional="NO" attributeType="Double" defaultValue="0.0" usesScalarValueType="YES"/>
+        <attribute name="topThemes" optional="YES" attributeType="String"/>
+        <attribute name="nextWeekFocus" optional="YES" attributeType="String"/>
+        <attribute name="moodTrend" optional="YES" attributeType="String"/>
+        <attribute name="insights" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="UserSettings" representedClassName="UserSettings" syncable="YES" codeGenerationType="class">
+        <attribute name="dailyReminderTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="isNotificationsEnabled" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <attribute name="currentStreak" optional="NO" attributeType="Integer 32" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="longestStreak" optional="NO" attributeType="Integer 32" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="lastCheckInDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="preferredIntent" optional="YES" attributeType="String"/>
+    </entity>
+</model>
