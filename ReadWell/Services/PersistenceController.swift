@@ -110,4 +110,45 @@ struct PersistenceController {
             }
         }
     }
+    
+    /// Clears all data from the database
+    func clearDatabase() {
+        let context = container.viewContext
+        
+        // List of all entities to clear
+        let entityNames = [
+            "StudentAnswer",
+            "ReadingSession",
+            "ComprehensionQuestion",
+            "ReadingText",
+            "Student",
+            "Teacher",
+            "TeacherSettings"
+        ]
+        
+        // Delete all objects for each entity
+        for entityName in entityNames {
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+            let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+            batchDeleteRequest.resultType = .resultTypeObjectIDs
+            
+            do {
+                let result = try context.execute(batchDeleteRequest) as? NSBatchDeleteResult
+                
+                // Merge changes into the view context
+                if let objectIDs = result?.result as? [NSManagedObjectID] {
+                    let changes = [NSDeletedObjectsKey: objectIDs]
+                    NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
+                }
+                
+                print("✅ Cleared \(entityName)")
+            } catch {
+                print("❌ Error clearing \(entityName): \(error.localizedDescription)")
+            }
+        }
+        
+        // Save the context
+        save()
+        print("🗑️ Database cleared successfully!")
+    }
 }

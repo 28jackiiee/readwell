@@ -483,7 +483,7 @@ struct ComprehensionCheckView: View {
                         Image(systemName: isCorrect ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
                             .font(.system(size: 70))
                             .foregroundColor(isCorrect ? .green : .orange)
-                            .shadow(color: (isCorrect ? .green : .orange).opacity(0.3), radius: 10, y: 5)
+                            .shadow(color: isCorrect ? Color.green.opacity(0.3) : Color.orange.opacity(0.3), radius: 10, y: 5)
                     }
                     
                     VStack(spacing: 8) {

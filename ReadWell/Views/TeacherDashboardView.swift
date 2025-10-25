@@ -8,6 +8,7 @@ struct TeacherDashboardView: View {
     @State private var students: [Student] = []
     @State private var selectedStudent: Student?
     @State private var showStudentDetail = false
+    @State private var showClearDatabaseAlert = false
     
     var body: some View {
         ZStack {
@@ -63,6 +64,23 @@ struct TeacherDashboardView: View {
             
             Spacer()
             
+            // Clear Database Button
+            Button(action: {
+                showClearDatabaseAlert = true
+            }) {
+                HStack {
+                    Image(systemName: "trash")
+                    Text("Clear DB")
+                }
+                .font(.subheadline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.red.opacity(0.6))
+                .cornerRadius(20)
+            }
+            
+            // Logout Button
             Button(action: {
                 appViewModel.logout()
             }) {
@@ -79,6 +97,14 @@ struct TeacherDashboardView: View {
             }
         }
         .padding()
+        .alert("Clear Database?", isPresented: $showClearDatabaseAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear All Data", role: .destructive) {
+                clearDatabase()
+            }
+        } message: {
+            Text("This will permanently delete all students, teachers, reading sessions, and progress data. This action cannot be undone.")
+        }
     }
     
     // MARK: - Overview Section
@@ -186,6 +212,12 @@ struct TeacherDashboardView: View {
     
     private func loadStudents() {
         students = appViewModel.getAllStudents()
+    }
+    
+    private func clearDatabase() {
+        PersistenceController.shared.clearDatabase()
+        loadStudents()
+        appViewModel.logout()
     }
 }
 
