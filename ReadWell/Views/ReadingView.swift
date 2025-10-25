@@ -295,29 +295,27 @@ struct ReadingView: View {
                 
                 Spacer()
                 
-                // Finish Button - Enhanced
+                // Done Reading Button - Enhanced
                 Button(action: {
                     ttsService.stop()
                     appViewModel.completeReading()
                 }) {
                     HStack(spacing: 8) {
-                        Text("Finish Reading")
-                            .font(.system(size: 17, weight: .semibold))
-                        Image(systemName: "arrow.right.circle.fill")
+                        Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 20))
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 18)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
                     .background(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.green.opacity(0.85)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                            gradient: Gradient(colors: [Color.green, Color.green.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
                         )
                     )
                     .cornerRadius(16)
-                    .shadow(color: .green.opacity(0.4), radius: 10, y: 5)
+                    .shadow(color: .green.opacity(0.3), radius: 8, y: 4)
                 }
             }
             .padding(.horizontal, 24)

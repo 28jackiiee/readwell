@@ -3,6 +3,7 @@ build/
 *.xcworkspace
 *.xcodeproj
 .env
+ReadWell/Utilities/Config.plist
 
 # Ignore Swift Package Manager artifacts
 .swiftpm/

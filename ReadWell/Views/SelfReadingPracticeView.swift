@@ -20,13 +20,7 @@ struct SelfReadingPracticeView: View {
     
     var body: some View {
         ZStack {
-            // Gradient Background
-            LinearGradient(
-                gradient: Gradient(colors: [Color.beigeBackground, Color.beigeBackground.opacity(0.9)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.beigeBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Header
@@ -40,24 +34,17 @@ struct SelfReadingPracticeView: View {
                     completionView
                 } else {
                     // Main reading practice area
-                    VStack(spacing: 0) {
+                    VStack(spacing: 20) {
                         // Progress bar
                         progressBar
                         
                         // Text display with color coding
                         ScrollView {
                             textDisplayView
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 20)
-                                .padding(.bottom, 100) // Extra padding for bottom controls
+                                .padding()
                         }
                         
-                        Spacer()
-                    }
-                    
-                    // Recording controls - Always at bottom
-                    VStack {
-                        Spacer()
+                        // Recording controls
                         recordingControls
                     }
                 }
@@ -87,48 +74,29 @@ struct SelfReadingPracticeView: View {
     // MARK: - Top Bar
     
     private var topBar: some View {
-        HStack(spacing: 16) {
-            // Back Button with enhanced design
+        HStack {
             Button(action: {
                 if speechService.isRecording {
                     speechService.stopRecording()
                 }
                 appViewModel.goBack()
             }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                    Text("Back")
-                        .font(.system(size: 16, weight: .medium))
-                }
-                .foregroundColor(.blue)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.blue.opacity(0.1))
-                )
+                Image(systemName: "chevron.left")
+                    .font(.title3)
+                    .foregroundColor(.primary)
+                    .padding()
             }
             
-            Spacer()
-            
             Text("Read Aloud Practice")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.primary.opacity(0.8))
+                .font(.title2)
+                .fontWeight(.bold)
             
             Spacer()
-            
-            // Invisible spacer for balance
-            Color.clear
-                .frame(width: 80)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .background(
-            Rectangle()
-                .fill(Color.white.opacity(0.98))
-                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
-        )
+        .padding(.horizontal)
+        .padding(.top, 8)
+        .background(Color.white.opacity(0.95))
+        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
     }
     
     // MARK: - Instructions View
@@ -137,28 +105,16 @@ struct SelfReadingPracticeView: View {
         VStack(spacing: 30) {
             Spacer()
             
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.blue.opacity(0.05)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 140, height: 140)
-                
-                Image(systemName: "mic.circle.fill")
-                    .font(.system(size: 80))
-                    .foregroundColor(.blue)
-            }
+            Image(systemName: "mic.circle.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.blue)
             
             VStack(spacing: 16) {
                 Text("Read the Text Aloud")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.title)
+                    .fontWeight(.bold)
                 
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 12) {
                     InstructionRow(
                         icon: "checkmark.circle.fill",
                         color: .green,
@@ -174,41 +130,27 @@ struct SelfReadingPracticeView: View {
                     InstructionRow(
                         icon: "mic.fill",
                         color: .blue,
-                        text: "Tap the play button to start reading"
+                        text: "Tap the microphone to start reading"
                     )
                 }
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.95))
-                        .shadow(color: .black.opacity(0.08), radius: 15, y: 5)
-                )
+                .padding()
+                .background(Color.white.opacity(0.7))
+                .cornerRadius(12)
             }
             .padding(.horizontal, 30)
             
             Button(action: {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                withAnimation {
                     showInstructions = false
                 }
             }) {
-                HStack(spacing: 10) {
-                    Text("Start Practice")
-                        .font(.system(size: 18, weight: .semibold))
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.system(size: 20))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.85)]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .cornerRadius(16)
-                .shadow(color: .blue.opacity(0.4), radius: 12, y: 6)
+                Text("Start Practice")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
             }
             .padding(.horizontal, 40)
             
@@ -222,56 +164,16 @@ struct SelfReadingPracticeView: View {
         let matchedWords = wordMatches.filter { $0.status != .unmatched }.count
         let progress = textWords.isEmpty ? 0.0 : Double(matchedWords) / Double(textWords.count)
         
-        return VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "book.fill")
-                    .foregroundColor(.blue)
-                    .font(.system(size: 16))
-                
-                Text("\(matchedWords) of \(textWords.count) words read")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                Text("\(Int(progress * 100))%")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color.blue.opacity(0.15))
-                    )
-            }
+        return VStack(spacing: 8) {
+            ProgressView(value: progress)
+                .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                .frame(height: 8)
             
-            // Enhanced progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
-                    
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.7)]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: geometry.size.width * CGFloat(progress))
-                        .animation(.linear(duration: 0.3), value: progress)
-                }
-            }
-            .frame(height: 8)
+            Text("\(matchedWords) of \(textWords.count) words read")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.95))
-                .shadow(color: .black.opacity(0.08), radius: 10, y: 3)
-        )
-        .padding(.horizontal, 20)
+        .padding(.horizontal)
         .padding(.top, 12)
     }
     
@@ -281,25 +183,21 @@ struct SelfReadingPracticeView: View {
         VStack(alignment: .leading, spacing: 20) {
             if let title = appViewModel.currentText?.title {
                 Text(title)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.primary)
-                    .padding(.bottom, 8)
-                    .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
-                
-                Divider()
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .padding(.bottom, 8)
             }
             
             // Display text with color coding
             createColorCodedText()
-                .lineSpacing(12)
+                .lineSpacing(10)
             
             // Show current transcript for debugging
             if showDebugInfo && !speechService.transcript.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("You said:")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.caption)
                             .foregroundColor(.secondary)
                         
                         Spacer()
@@ -310,53 +208,39 @@ struct SelfReadingPracticeView: View {
                                     .fill(Color.red)
                                     .frame(width: 8, height: 8)
                                 Text("Recording")
-                                    .font(.system(size: 11, weight: .medium))
+                                    .font(.caption2)
                                     .foregroundColor(.red)
                             }
                         }
                     }
                     
                     Text(speechService.transcript)
-                        .font(.system(size: 13))
+                        .font(.caption)
                         .foregroundColor(.blue)
-                        .padding(10)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.blue.opacity(0.08))
-                        )
+                        .padding(8)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
                     
                     // Show match statistics
-                    HStack(spacing: 16) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text("\(wordMatches.filter { $0.status == .correct }.count) correct")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.green)
-                        }
+                    HStack {
+                        Label("\(wordMatches.filter { $0.status == .correct }.count) correct", systemImage: "checkmark.circle.fill")
+                            .font(.caption2)
+                            .foregroundColor(.green)
                         
-                        HStack(spacing: 6) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.red)
-                            Text("\(wordMatches.filter { $0.status == .incorrect }.count) incorrect")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.red)
-                        }
+                        Label("\(wordMatches.filter { $0.status == .incorrect }.count) incorrect", systemImage: "xmark.circle.fill")
+                            .font(.caption2)
+                            .foregroundColor(.red)
                         
                         Spacer()
                     }
                     .padding(.top, 4)
                 }
-                .padding(.top, 12)
+                .padding(.top, 8)
             }
         }
-        .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.95))
-                .shadow(color: .black.opacity(0.08), radius: 15, y: 5)
-        )
+        .padding()
+        .background(Color.white.opacity(0.8))
+        .cornerRadius(12)
     }
     
     private func createColorCodedText() -> Text {
@@ -389,59 +273,39 @@ struct SelfReadingPracticeView: View {
     // MARK: - Recording Controls
     
     private var recordingControls: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 16) {
             // Microphone status indicator
             if speechService.isRecording {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     Circle()
                         .fill(Color.red)
-                        .frame(width: 10, height: 10)
+                        .frame(width: 12, height: 12)
                         .opacity(0.8)
                     
                     Text("Listening...")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.red)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
-                .padding(.bottom, 16)
             }
             
-            HStack(spacing: 24) {
-                // Microphone button - Large and prominent
+            HStack(spacing: 30) {
+                // Microphone button
                 Button(action: {
                     toggleRecording()
                 }) {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: speechService.isRecording ? [Color.red, Color.red.opacity(0.8)] : [Color.blue, Color.blue.opacity(0.8)]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 80, height: 80)
-                            .shadow(color: (speechService.isRecording ? Color.red : Color.blue).opacity(0.4), radius: 12, y: 6)
+                    VStack(spacing: 8) {
+                        Image(systemName: speechService.isRecording ? "mic.fill" : "mic.slash.fill")
+                            .font(.system(size: 44))
+                            .foregroundColor(speechService.isRecording ? .red : .blue)
                         
-                        Image(systemName: speechService.isRecording ? "stop.fill" : "play.fill")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.white)
+                        Text(speechService.isRecording ? "Stop" : "Start Reading")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .disabled(!speechService.isAuthorized)
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(speechService.isRecording ? "Stop Recording" : "Start Reading")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                    Text(speechService.isRecording ? "Tap to stop" : "Tap to begin")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                // Finish button - Enhanced
+                // Finish button
                 Button(action: {
                     if speechService.isRecording {
                         speechService.stopRecording()
@@ -450,54 +314,30 @@ struct SelfReadingPracticeView: View {
                         practiceComplete = true
                     }
                 }) {
-                    VStack(spacing: 6) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [Color.green, Color.green.opacity(0.85)]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 70, height: 70)
-                                .shadow(color: .green.opacity(0.4), radius: 10, y: 5)
-                            
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(.white)
-                        }
+                    VStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 44))
+                            .foregroundColor(.green)
                         
                         Text("Finish")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.green)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
             
             // Authorization message
             if !speechService.isAuthorized {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    
-                    Text("Please enable microphone and speech recognition in Settings")
-                        .font(.system(size: 13))
-                        .foregroundColor(.orange)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 16)
-                .multilineTextAlignment(.center)
+                Text("Please enable microphone and speech recognition in Settings")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
         }
-        .background(
-            Rectangle()
-                .fill(Color.white.opacity(0.98))
-                .shadow(color: .black.opacity(0.12), radius: 15, y: -5)
-                .ignoresSafeArea(edges: .bottom)
-        )
+        .padding(.vertical, 20)
+        .background(Color.white.opacity(0.95))
+        .shadow(color: .black.opacity(0.1), radius: 10, y: -5)
     }
     
     // MARK: - Completion View
@@ -749,23 +589,16 @@ struct InstructionRow: View {
     let text: String
     
     var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 40, height: 40)
-                
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                    .font(.system(size: 18, weight: .semibold))
-            }
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.title3)
             
             Text(text)
-                .font(.system(size: 15, weight: .medium))
+                .font(.body)
                 .foregroundColor(.primary)
-                .fixedSize(horizontal: false, vertical: true)
             
-            Spacer(minLength: 0)
+            Spacer()
         }
     }
 }

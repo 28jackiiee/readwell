@@ -12,53 +12,44 @@ struct ComprehensionCheckView: View {
     @State private var isCorrect = false
     @State private var questions: [ComprehensionQuestion] = []
     @State private var lastAnsweredQuestion: ComprehensionQuestion?
+    @State private var animateSubmit = false
     
     var body: some View {
         ZStack {
-            Color.beigeBackground.ignoresSafeArea()
+            // Gradient Background
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.95, green: 0.96, blue: 1.0),
+                    Color(red: 0.98, green: 0.96, blue: 0.94)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Header
                 header
                 
                 // Progress
-                progressBar
+                if !questions.isEmpty {
+                    progressBar
+                }
                 
                 if questions.isEmpty {
                     // No questions available
-                    VStack(spacing: 20) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.green)
-                        
-                        Text("Great job reading!")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        Text("No comprehension questions available for this text.")
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                        
-                        Button(action: {
-                            appViewModel.goToTextLibrary()
-                        }) {
-                            Text("Back to Library")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 30)
-                                .padding(.vertical, 16)
-                                .background(Color.blue)
-                                .cornerRadius(12)
-                        }
-                        .padding(.top, 20)
-                    }
-                    .padding()
+                    emptyStateView
                 } else if currentQuestionIndex < questions.count {
                     // Question view
                     questionView
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
                 } else {
                     // All done - submit
                     completionView
+                        .transition(.scale.combined(with: .opacity))
                 }
                 
                 Spacer()
@@ -67,57 +58,178 @@ struct ComprehensionCheckView: View {
             // Result overlay
             if showResult {
                 resultOverlay
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
         }
         .navigationBarHidden(true)
         .onAppear {
             loadQuestions()
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentQuestionIndex)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showResult)
     }
     
     // MARK: - Header
     
     private var header: some View {
-        HStack {
+        HStack(spacing: 16) {
+            // Back Button
             Button(action: {
                 appViewModel.goBack()
             }) {
-                Image(systemName: "chevron.left")
-                    .font(.title3)
-                    .foregroundColor(.primary)
-                    .padding()
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("Back")
+                        .font(.system(size: 16, weight: .medium))
+                }
+                .foregroundColor(.blue)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.blue.opacity(0.1))
+                )
             }
             
-            Text("Comprehension Check")
-                .font(.title2)
-                .fontWeight(.bold)
+            Spacer()
+            
+            // Title with icon
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.blue)
+                
+                Text("Comprehension Check")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.primary)
+            }
             
             Spacer()
         }
-        .padding(.horizontal)
-        .padding(.top, 8)
-        .background(Color.white.opacity(0.95))
-        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(
+            Rectangle()
+                .fill(Color.white.opacity(0.98))
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+        )
     }
     
     // MARK: - Progress Bar
     
     private var progressBar: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             HStack(spacing: 8) {
                 ForEach(0..<questions.count, id: \.self) { index in
-                    Capsule()
-                        .fill(index < currentQuestionIndex ? Color.green : (index == currentQuestionIndex ? Color.blue : Color.gray.opacity(0.3)))
-                        .frame(height: 6)
+                    ZStack {
+                        Capsule()
+                            .fill(index < currentQuestionIndex ? Color.green : (index == currentQuestionIndex ? Color.blue : Color.gray.opacity(0.2)))
+                            .frame(height: 8)
+                        
+                        if index < currentQuestionIndex {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentQuestionIndex)
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
             
-            Text("Question \(currentQuestionIndex + 1) of \(questions.count)")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.blue)
+                
+                Text("Question \(min(currentQuestionIndex + 1, questions.count)) of \(questions.count)")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Text("\(Int(Double(currentQuestionIndex) / Double(questions.count) * 100))% Complete")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color.blue.opacity(0.1))
+                    )
+            }
+            .padding(.horizontal, 20)
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.9))
+                .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+    
+    // MARK: - Empty State View
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.green.opacity(0.2), Color.green.opacity(0.1)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(.green)
+            }
+            
+            Text("Great job reading!")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.primary)
+            
+            Text("No comprehension questions available for this text.")
+                .font(.system(size: 16))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            
+            Button(action: {
+                appViewModel.goToTextLibrary()
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "books.vertical.fill")
+                        .font(.system(size: 18))
+                    Text("Back to Library")
+                        .font(.system(size: 17, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(16)
+                .shadow(color: .blue.opacity(0.3), radius: 10, y: 5)
+            }
+            .padding(.top, 12)
+            
+            Spacer()
+        }
+        .padding()
     }
     
     // MARK: - Question View
@@ -128,25 +240,57 @@ struct ComprehensionCheckView: View {
         
         return ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Question text
-                Text(question.question ?? "")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .multilineTextAlignment(.leading)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.05), radius: 5)
+                // Question Card
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "questionmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.blue)
+                        
+                        Text("Question")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.secondary)
+                        
+                        Spacer()
+                    }
+                    
+                    Text(question.question ?? "")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                        .lineSpacing(4)
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.08), radius: 15, y: 5)
+                )
+                
+                // Answer options label
+                HStack {
+                    Image(systemName: "list.bullet.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.blue)
+                    
+                    Text("Choose your answer:")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                }
+                .padding(.horizontal, 4)
                 
                 // Answer options
-                VStack(spacing: 16) {
-                    ForEach(options, id: \.self) { option in
+                VStack(spacing: 14) {
+                    ForEach(Array(options.enumerated()), id: \.offset) { index, option in
                         AnswerButton(
                             text: option,
+                            index: index,
                             isSelected: selectedAnswer == option,
                             action: {
-                                selectedAnswer = option
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    selectedAnswer = option
+                                }
                             }
                         )
                     }
@@ -154,51 +298,157 @@ struct ComprehensionCheckView: View {
                 
                 // Submit button
                 Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        animateSubmit.toggle()
+                    }
                     submitAnswer(question: question, answer: selectedAnswer)
                 }) {
-                    Text("Submit Answer")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(selectedAnswer.isEmpty ? Color.gray : Color.blue)
-                        .cornerRadius(12)
+                    HStack(spacing: 10) {
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 18))
+                        Text("Submit Answer")
+                            .font(.system(size: 18, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(
+                        Group {
+                            if selectedAnswer.isEmpty {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.gray.opacity(0.4))
+                            } else {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .shadow(color: .blue.opacity(0.4), radius: 12, y: 6)
+                            }
+                        }
+                    )
+                    .scaleEffect(animateSubmit ? 1.05 : 1.0)
                 }
                 .disabled(selectedAnswer.isEmpty)
-                .padding(.top, 20)
+                .padding(.top, 8)
             }
-            .padding()
+            .padding(20)
         }
     }
     
     // MARK: - Completion View
     
     private var completionView: some View {
-        VStack(spacing: 30) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.green)
+        VStack(spacing: 32) {
+            Spacer()
             
-            Text("All Questions Answered!")
-                .font(.title)
-                .fontWeight(.bold)
+            // Success Icon
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.green.opacity(0.2), Color.green.opacity(0.1)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 140, height: 140)
+                
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 90))
+                    .foregroundColor(.green)
+                    .shadow(color: .green.opacity(0.3), radius: 10, y: 5)
+            }
             
-            Text("You answered \(answers.count) questions.")
-                .font(.headline)
-                .foregroundColor(.secondary)
+            VStack(spacing: 12) {
+                Text("All Questions Answered!")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+                
+                Text("Great job completing all \(answers.count) questions!")
+                    .font(.system(size: 17))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 30)
             
+            // Stats Card
+            HStack(spacing: 20) {
+                VStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.blue)
+                    
+                    Text("\(answers.count)")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.primary)
+                    
+                    Text("Answered")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.06), radius: 10, y: 4)
+                )
+                
+                VStack(spacing: 6) {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.orange)
+                    
+                    Text("100%")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.primary)
+                    
+                    Text("Complete")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.06), radius: 10, y: 4)
+                )
+            }
+            .padding(.horizontal, 30)
+            
+            // Finish Button
             Button(action: {
                 appViewModel.submitComprehensionAnswers(answers: answers)
             }) {
-                Text("See Your Results")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
+                HStack(spacing: 10) {
+                    Text("See Your Results")
+                        .font(.system(size: 19, weight: .bold))
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: 22))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(16)
+                .shadow(color: .blue.opacity(0.4), radius: 15, y: 8)
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 30)
+            .padding(.top, 10)
+            
+            Spacer()
         }
         .padding()
     }
@@ -207,60 +457,136 @@ struct ComprehensionCheckView: View {
     
     private var resultOverlay: some View {
         ZStack {
-            Color.black.opacity(0.5)
+            Color.black.opacity(0.6)
                 .ignoresSafeArea()
+                .onTapGesture {
+                    // Prevent dismissal by tap
+                }
             
-            VStack(spacing: 24) {
-                Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .font(.system(size: 70))
-                    .foregroundColor(isCorrect ? .green : .orange)
-                
-                Text(isCorrect ? "Correct!" : "Not quite right")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
-                if !isCorrect, let question = lastAnsweredQuestion {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("The correct answer is:")
-                            .font(.headline)
+            VStack(spacing: 0) {
+                // Icon and Title
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        (isCorrect ? Color.green : Color.orange).opacity(0.2),
+                                        (isCorrect ? Color.green : Color.orange).opacity(0.1)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 100, height: 100)
                         
-                        Text(question.correctAnswer ?? "")
-                            .font(.body)
-                            .padding()
-                            .background(Color.green.opacity(0.1))
-                            .cornerRadius(8)
+                        Image(systemName: isCorrect ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                            .font(.system(size: 70))
+                            .foregroundColor(isCorrect ? .green : .orange)
+                            .shadow(color: (isCorrect ? .green : .orange).opacity(0.3), radius: 10, y: 5)
+                    }
+                    
+                    VStack(spacing: 8) {
+                        Text(isCorrect ? "Correct!" : "Not quite right")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(.primary)
                         
-                        if let explanation = question.explanation, !explanation.isEmpty {
-                            Text(explanation)
-                                .font(.subheadline)
+                        if isCorrect {
+                            Text("Great job! Keep it up!")
+                                .font(.system(size: 16))
                                 .foregroundColor(.secondary)
-                                .padding(.top, 8)
                         }
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(12)
+                }
+                .padding(.vertical, 32)
+                
+                // Explanation (if incorrect)
+                if !isCorrect, let question = lastAnsweredQuestion {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Image(systemName: "lightbulb.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(.orange)
+                            
+                            Text("The correct answer:")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        Text(question.correctAnswer ?? "")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(.primary)
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.green.opacity(0.15))
+                            )
+                        
+                        if let explanation = question.explanation, !explanation.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: "info.circle.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.blue)
+                                    
+                                    Text("Explanation:")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Text(explanation)
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.secondary)
+                                    .lineSpacing(4)
+                            }
+                            .padding(14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.blue.opacity(0.05))
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
                 }
                 
+                // Continue Button
                 Button(action: {
-                    showResult = false
-                    selectedAnswer = ""
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        showResult = false
+                        selectedAnswer = ""
+                    }
                 }) {
-                    Text("Continue")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
+                    HStack(spacing: 8) {
+                        Text("Continue")
+                            .font(.system(size: 18, weight: .bold))
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: 20))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(14)
+                    .shadow(color: .blue.opacity(0.4), radius: 12, y: 6)
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 28)
             }
-            .padding(30)
-            .background(Color.white)
-            .cornerRadius(20)
-            .shadow(radius: 20)
-            .frame(maxWidth: 400)
-            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.white)
+                    .shadow(color: .black.opacity(0.2), radius: 30, y: 15)
+            )
+            .frame(maxWidth: 460)
+            .padding(24)
         }
     }
     
@@ -307,31 +633,74 @@ struct ComprehensionCheckView: View {
 
 struct AnswerButton: View {
     let text: String
+    let index: Int
     let isSelected: Bool
     let action: () -> Void
     
+    private let letters = ["A", "B", "C", "D", "E", "F"]
+    
     var body: some View {
         Button(action: action) {
-            HStack {
+            HStack(spacing: 16) {
+                // Letter indicator
+                ZStack {
+                    Circle()
+                        .fill(
+                            isSelected ?
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ) :
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.15)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 36, height: 36)
+                    
+                    Text(letters[min(index, letters.count - 1)])
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(isSelected ? .white : .secondary)
+                }
+                
                 Text(text)
-                    .font(.body)
+                    .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? .white : .primary)
                     .multilineTextAlignment(.leading)
+                    .lineSpacing(2)
                 
                 Spacer()
                 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))
                         .foregroundColor(.white)
                 }
             }
-            .padding()
-            .background(isSelected ? Color.blue : Color.white)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 2)
+            .padding(18)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        isSelected ?
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.9)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ) :
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.white, Color.white]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.25), lineWidth: isSelected ? 2.5 : 1.5)
+            )
+            .shadow(color: isSelected ? Color.blue.opacity(0.3) : Color.black.opacity(0.04), radius: isSelected ? 10 : 5, y: isSelected ? 4 : 2)
         }
         .buttonStyle(PlainButtonStyle())
     }
