@@ -68,29 +68,55 @@ class AppViewModel: ObservableObject {
         currentUser = user
         
         if user.role == .teacher {
-            // Load teacher entity
+            // Load teacher entity - try by email (username) first
             if let context = viewContext {
                 let request: NSFetchRequest<Teacher> = Teacher.fetchRequest()
-                request.predicate = NSPredicate(format: "id == %@", user.id as CVarArg)
+                request.predicate = NSPredicate(format: "username == %@", user.email)
                 request.fetchLimit = 1
                 
                 if let teacher = try? context.fetch(request).first {
                     currentTeacher = teacher
                     isTeacherMode = true
                     currentView = .teacherDashboard
+                } else {
+                    // Try by UUID if email doesn't match
+                    if let uuid = UUID(uuidString: user.id) {
+                        let uuidRequest: NSFetchRequest<Teacher> = Teacher.fetchRequest()
+                        uuidRequest.predicate = NSPredicate(format: "id == %@", uuid as CVarArg)
+                        uuidRequest.fetchLimit = 1
+                        
+                        if let teacher = try? context.fetch(uuidRequest).first {
+                            currentTeacher = teacher
+                            isTeacherMode = true
+                            currentView = .teacherDashboard
+                        }
+                    }
                 }
             }
         } else {
-            // Load student entity
+            // Load student entity - try by email (username) first
             if let context = viewContext {
                 let request: NSFetchRequest<Student> = Student.fetchRequest()
-                request.predicate = NSPredicate(format: "id == %@", user.id as CVarArg)
+                request.predicate = NSPredicate(format: "username == %@", user.email)
                 request.fetchLimit = 1
                 
                 if let student = try? context.fetch(request).first {
                     currentStudent = student
                     isTeacherMode = false
                     currentView = .textLibrary
+                } else {
+                    // Try by UUID if email doesn't match
+                    if let uuid = UUID(uuidString: user.id) {
+                        let uuidRequest: NSFetchRequest<Student> = Student.fetchRequest()
+                        uuidRequest.predicate = NSPredicate(format: "id == %@", uuid as CVarArg)
+                        uuidRequest.fetchLimit = 1
+                        
+                        if let student = try? context.fetch(uuidRequest).first {
+                            currentStudent = student
+                            isTeacherMode = false
+                            currentView = .textLibrary
+                        }
+                    }
                 }
             }
         }

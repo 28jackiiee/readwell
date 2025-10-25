@@ -9,18 +9,21 @@ enum AuthTab {
 struct AuthenticationView: View {
     @EnvironmentObject var appViewModel: AppViewModel
     @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var authService = AuthenticationService()
+    @StateObject private var authService = FirebaseAuthService()
     
     @State private var selectedTab: AuthTab = .signIn
     @State private var isLoading = false
     
     // Sign In fields
-    @State private var signInUsername = ""
+    @State private var signInEmail = ""
     @State private var signInPassword = ""
     @State private var showSignInPassword = false
+    @State private var showForgotPassword = false
+    @State private var resetEmail = ""
+    @State private var showResetSuccess = false
     
     // Sign Up fields
-    @State private var signUpUsername = ""
+    @State private var signUpEmail = ""
     @State private var signUpPassword = ""
     @State private var signUpConfirmPassword = ""
     @State private var signUpName = ""
@@ -91,11 +94,12 @@ struct AuthenticationView: View {
                     ZStack {
                         if selectedTab == .signIn {
                             SignInView(
-                                username: $signInUsername,
+                                email: $signInEmail,
                                 password: $signInPassword,
                                 showPassword: $showSignInPassword,
                                 authService: authService,
                                 isLoading: $isLoading,
+                                showForgotPassword: $showForgotPassword,
                                 onSignIn: handleSignIn
                             )
                             .transition(.asymmetric(
@@ -104,7 +108,7 @@ struct AuthenticationView: View {
                             ))
                         } else {
                             SignUpView(
-                                username: $signUpUsername,
+                                email: $signUpEmail,
                                 password: $signUpPassword,
                                 confirmPassword: $signUpConfirmPassword,
                                 name: $signUpName,
@@ -124,6 +128,45 @@ struct AuthenticationView: View {
                         }
                     }
                     .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
+            
+            // Forgot Password overlay
+            if showForgotPassword {
+                ForgotPasswordOverlay(
+                    isPresented: $showForgotPassword,
+                    resetEmail: $resetEmail,
+                    showSuccess: $showResetSuccess,
+                    authService: authService
+                )
+            }
+            
+            // Success message
+            if showResetSuccess {
+                VStack {
+                    Spacer()
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 20))
+                        Text("Password reset email sent!")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.green.opacity(0.9))
+                            .shadow(radius: 10)
+                    )
+                    .padding(.bottom, 50)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation {
+                            showResetSuccess = false
+                        }
+                    }
+                }
+            }
                 }
                 .padding(.bottom, 50)
             }
@@ -134,14 +177,12 @@ struct AuthenticationView: View {
     }
     
     private func handleSignIn() {
-        isLoading = true
-        
-        // Simulate network delay for smooth UX
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if authService.signIn(username: signInUsername, password: signInPassword) {
+        Task {
+            isLoading = true
+            if await authService.signIn(email: signInEmail, password: signInPassword) {
                 appViewModel.authenticateUser(authService.currentUser!)
                 // Clear fields
-                signInUsername = ""
+                signInEmail = ""
                 signInPassword = ""
             }
             isLoading = false
@@ -155,28 +196,24 @@ struct AuthenticationView: View {
             return
         }
         
-        isLoading = true
-        
-        let gradeLevel = selectedRole == .student ? studentGradeLevel : nil
-        let schoolName = selectedRole == .teacher ? teacherSchoolName : nil
-        
-        // Simulate network delay for smooth UX
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if authService.signUp(
-                username: signUpUsername,
+        Task {
+            isLoading = true
+            
+            let gradeLevel = selectedRole == .student ? studentGradeLevel : nil
+            let schoolName = selectedRole == .teacher ? teacherSchoolName : nil
+            
+            if await authService.signUp(
+                email: signUpEmail,
                 password: signUpPassword,
                 name: signUpName,
                 role: selectedRole,
                 gradeLevel: gradeLevel,
                 schoolName: schoolName
             ) {
-                // Auto sign in after successful sign up
-                if authService.signIn(username: signUpUsername, password: signUpPassword) {
-                    appViewModel.authenticateUser(authService.currentUser!)
-                }
+                appViewModel.authenticateUser(authService.currentUser!)
                 
                 // Clear fields
-                signUpUsername = ""
+                signUpEmail = ""
                 signUpPassword = ""
                 signUpConfirmPassword = ""
                 signUpName = ""
@@ -217,7 +254,7 @@ struct AnimatedGradientBackground: View {
 
 struct ModernTabSelector: View {
     @Binding var selectedTab: AuthTab
-    @ObservedObject var authService: AuthenticationService
+    @ObservedObject var authService: FirebaseAuthService
     @Namespace private var animation
     
     var body: some View {
@@ -301,34 +338,36 @@ struct ScaleButtonStyle: ButtonStyle {
 // MARK: - Sign In View
 
 struct SignInView: View {
-    @Binding var username: String
+    @Binding var email: String
     @Binding var password: String
     @Binding var showPassword: Bool
-    @ObservedObject var authService: AuthenticationService
+    @ObservedObject var authService: FirebaseAuthService
     @Binding var isLoading: Bool
+    @Binding var showForgotPassword: Bool
     let onSignIn: () -> Void
     
     @FocusState private var focusedField: Field?
     
     enum Field {
-        case username, password
+        case email, password
     }
     
     var body: some View {
         VStack(spacing: 24) {
             VStack(spacing: 20) {
-                // Username Field
+                // Email Field
                 ModernTextField(
-                    icon: "person.fill",
-                    placeholder: "Username",
-                    text: $username,
+                    icon: "envelope.fill",
+                    placeholder: "Email",
+                    text: $email,
                     isSecure: false,
                     showPassword: .constant(false)
                 )
-                .focused($focusedField, equals: .username)
-                .textContentType(.username)
+                .focused($focusedField, equals: .email)
+                .textContentType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
+                .keyboardType(.emailAddress)
                 
                 // Password Field
                 ModernTextField(
@@ -340,6 +379,17 @@ struct SignInView: View {
                 )
                 .focused($focusedField, equals: .password)
                 .textContentType(.password)
+                
+                // Forgot Password Link
+                Button(action: {
+                    showForgotPassword = true
+                }) {
+                    Text("Forgot Password?")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.top, -8)
             }
             
             // Error message
@@ -410,14 +460,14 @@ struct SignInView: View {
     }
     
     private var canSignIn: Bool {
-        !username.isEmpty && !password.isEmpty
+        !email.isEmpty && !password.isEmpty
     }
 }
 
 // MARK: - Sign Up View
 
 struct SignUpView: View {
-    @Binding var username: String
+    @Binding var email: String
     @Binding var password: String
     @Binding var confirmPassword: String
     @Binding var name: String
@@ -426,14 +476,14 @@ struct SignUpView: View {
     @Binding var teacherSchoolName: String
     @Binding var showPassword: Bool
     @Binding var showConfirmPassword: Bool
-    @ObservedObject var authService: AuthenticationService
+    @ObservedObject var authService: FirebaseAuthService
     @Binding var isLoading: Bool
     let onSignUp: () -> Void
     
     @FocusState private var focusedField: Field?
     
     enum Field {
-        case name, username, password, confirmPassword, schoolName
+        case name, email, password, confirmPassword, schoolName
     }
     
     var body: some View {
@@ -479,18 +529,19 @@ struct SignUpView: View {
                 .focused($focusedField, equals: .name)
                 .textContentType(.name)
                 
-                // Username Field
+                // Email Field
                 ModernTextField(
-                    icon: "at",
-                    placeholder: "Username",
-                    text: $username,
+                    icon: "envelope.fill",
+                    placeholder: "Email",
+                    text: $email,
                     isSecure: false,
                     showPassword: .constant(false)
                 )
-                .focused($focusedField, equals: .username)
-                .textContentType(.username)
+                .focused($focusedField, equals: .email)
+                .textContentType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
+                .keyboardType(.emailAddress)
                 
                 // Password Field
                 VStack(spacing: 8) {
@@ -636,7 +687,7 @@ struct SignUpView: View {
     }
     
     private var canSignUp: Bool {
-        !username.isEmpty && 
+        !email.isEmpty && 
         !password.isEmpty && 
         !confirmPassword.isEmpty && 
         !name.isEmpty &&
@@ -820,6 +871,108 @@ struct PasswordStrengthIndicator: View {
                 }
             }
             .frame(height: 6)
+        }
+    }
+}
+
+// MARK: - Forgot Password Overlay
+
+struct ForgotPasswordOverlay: View {
+    @Binding var isPresented: Bool
+    @Binding var resetEmail: String
+    @Binding var showSuccess: Bool
+    @ObservedObject var authService: FirebaseAuthService
+    
+    @State private var isLoading = false
+    
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    isPresented = false
+                }
+            
+            VStack(spacing: 24) {
+                VStack(spacing: 12) {
+                    Image(systemName: "envelope.badge.fill")
+                        .font(.system(size: 50))
+                        .foregroundColor(Color(red: 0.2, green: 0.4, blue: 0.9))
+                    
+                    Text("Reset Password")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    Text("Enter your email address and we'll send you a link to reset your password")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    TextField("Email", text: $resetEmail)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.emailAddress)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
+                }
+                
+                if !authService.authError.isEmpty {
+                    Text(authService.authError)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                }
+                
+                HStack(spacing: 16) {
+                    Button(action: {
+                        isPresented = false
+                        authService.authError = ""
+                    }) {
+                        Text("Cancel")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(12)
+                    }
+                    
+                    Button(action: sendResetEmail) {
+                        HStack {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else {
+                                Text("Send Reset Link")
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(resetEmail.isEmpty ? Color.gray : Color.blue)
+                        .cornerRadius(12)
+                    }
+                    .disabled(resetEmail.isEmpty || isLoading)
+                }
+            }
+            .padding(30)
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(radius: 20)
+            .frame(maxWidth: 400)
+            .padding()
+        }
+    }
+    
+    private func sendResetEmail() {
+        Task {
+            isLoading = true
+            if await authService.resetPassword(email: resetEmail) {
+                isPresented = false
+                resetEmail = ""
+                showSuccess = true
+                authService.authError = ""
+            }
+            isLoading = false
         }
     }
 }

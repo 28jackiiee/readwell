@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TeacherLoginView: View {
     @EnvironmentObject var appViewModel: AppViewModel
-    @StateObject private var authService = TeacherAuthService()
+    @StateObject private var authService = FirebaseAuthService()
     
     @State private var pin = ""
     @State private var showSetupPIN = false
@@ -252,7 +252,7 @@ struct TeacherLoginView: View {
     }
     
     private func authenticateTeacher() {
-        if authService.authenticate(pin: pin) {
+        if authService.authenticateTeacherWithPIN(pin) {
             appViewModel.switchToTeacherMode()
         } else {
             // Shake animation could be added here
@@ -356,7 +356,7 @@ struct NumberButton: View {
 
 struct SetupPINOverlay: View {
     @Binding var isPresented: Bool
-    @ObservedObject var authService: TeacherAuthService
+    @ObservedObject var authService: FirebaseAuthService
     
     @State private var newPIN = ""
     @State private var confirmPIN = ""
@@ -448,7 +448,7 @@ struct SetupPINOverlay: View {
             return
         }
         
-        if authService.setPIN(newPIN) {
+        if authService.setTeacherPIN(newPIN) {
             isPresented = false
         } else {
             error = authService.authError
@@ -460,7 +460,7 @@ struct SetupPINOverlay: View {
 
 struct ChangePINOverlay: View {
     @Binding var isPresented: Bool
-    @ObservedObject var authService: TeacherAuthService
+    @ObservedObject var authService: FirebaseAuthService
     
     @State private var currentPIN = ""
     @State private var newPIN = ""
@@ -559,7 +559,7 @@ struct ChangePINOverlay: View {
             return
         }
         
-        if authService.changePIN(currentPIN: currentPIN, newPIN: newPIN) {
+        if authService.changeTeacherPIN(currentPIN: currentPIN, newPIN: newPIN) {
             isPresented = false
         } else {
             error = authService.authError
