@@ -1,190 +1,298 @@
-# MindTalk - Daily Check-in iOS App
+# ReadWell - Reading Comprehension App for Struggling Readers
 
-A lightweight daily check-in app that guides users through 5-minute voice sessions, automatically generates summaries, tracks emotions, and creates actionable insights.
+A comprehensive reading support application designed to help struggling readers.
 
-## Features
+## Overview
 
-### Core Functionality
-- **5-minute guided voice sessions** with real-time speech recognition
-- **Automatic transcription** using offline Apple Speech Recognition
-- **AI-powered summary generation** from voice input
-- **Emotion detection and intensity tracking**
-- **SMART action generation** (3 actionable items per session)
-- **Next-day reflection** on completed actions
-- **Streak tracking** with forgiving logic (12-hour grace period)
+ReadWell is an iOS app designed to help struggling readers understand grade-level texts through:
 
-### User Experience
-- **4 intent categories**: School, Health, Relationships, Free Talk
-- **Energy level slider** (0-10) before sessions
-- **Live captions** with confidence indicators
-- **Automatic prompts** every 90 seconds during sessions
-- **Beautiful UI** with smooth animations and gradients
+1. **Accessible Reading UI** - Dyslexia-friendly visuals and bilingual support
+2. **Adaptive Text-to-Speech** - Adjustable pacing with word highlighting
+3. **Low-Friction Comprehension Checks** - Interactive question interface with immediate feedback
+4. **Teacher Dashboard** - Progress tracking and analytics for educators
 
-### Analytics & Insights
-- **Weekly review** with mood trends and completion rates
-- **7-day mood sparkline** visualization
-- **Action completion tracking** and progress bars
-- **Top themes identification** from session content
-- **PDF export** for sharing with counselors/coaches
+## Key Features
 
-### Notifications & Reminders
-- **Daily check-in reminders** at user-set times
-- **Action reminders** with smart time parsing
-- **Streak encouragement** notifications
-- **Weekly review reminders** (Sunday evenings)
+### For Students
 
-## Technical Stack
+#### 🎨 Dyslexia-Friendly Reading Experience
+- Adjustable font sizes (14-32pt)
+- Customizable line spacing (1.0-3.0x)
+- Multiple background color options (beige, cream, white, light blue)
+- Clean, distraction-free interface
+- Large, readable text optimized for struggling readers
 
-- **Platform**: iOS 17.0+
-- **Language**: Swift 5.9+
-- **UI Framework**: SwiftUI
-- **Database**: Core Data for local storage
-- **Speech Recognition**: Apple Speech Framework (offline)
-- **Natural Language Processing**: Apple NaturalLanguage Framework
-- **Charts**: iOS 16+ Charts framework with fallback
-- **Notifications**: UserNotifications framework
-- **PDF Generation**: PDFKit and UIGraphicsPDFRenderer
+#### 🌍 Bilingual Support
+- Side-by-side translation display
+- Toggle between original and translated text
+- Supports English, Spanish, French, and Mandarin
+- Helps ELL (English Language Learner) students
 
-## Architecture
+#### 🔊 Text-to-Speech (TTS)
+- Natural voice synthesis
+- Adjustable reading speed (0.1x - 1.0x)
+- Play, pause, and stop controls
+- Visual progress tracking
+- Sentence-by-sentence reading
 
-### MVVM Pattern
-- **Models**: Core Data entities (CheckInSession, Emotion, Action, UserSettings)
-- **ViewModels**: Business logic and state management
-- **Views**: SwiftUI views for each screen
-- **Services**: Dedicated services for speech, NLP, notifications, PDF export
+#### ✅ Comprehension Questions
+- Multiple-choice format
+- Immediate feedback on answers
+- Explanations for correct answers
+- Progress tracking through question sets
+- Low-pressure, encouraging interface
 
-### Key Components
+#### 📊 Progress Tracking
+- View reading history
+- See comprehension scores
+- Track improvement over time
+- Visual stats and achievements
 
-1. **SpeechRecognitionService**: Handles real-time voice transcription
-2. **NLPService**: Processes transcripts to extract summaries, emotions, and actions
-3. **NotificationService**: Manages all local notifications and reminders
-4. **PDFExportService**: Generates comprehensive reports
-5. **PersistenceController**: Core Data stack management
+### For Teachers
 
-## Project Structure
+#### 📈 Dashboard Analytics
+- Monitor all student progress
+- View class-wide statistics
+- Track individual student performance
+- Identify students who need additional support
 
-```
-MindTalk/
-├── MindTalkApp.swift              # App entry point
-├── ContentView.swift              # Main navigation controller
-├── Models/                        # Core Data model files
-├── Views/
-│   ├── StartView.swift           # Welcome screen with intent selection
-│   ├── GuidedTalkView.swift      # 5-minute recording session
-│   ├── SummaryView.swift         # Post-session results
-│   ├── ReflectionView.swift      # Next-day action review
-│   └── WeeklyReviewView.swift    # Analytics and insights
-├── ViewModels/
-│   └── AppViewModel.swift        # Main app state management
-├── Services/
-│   ├── PersistenceController.swift
-│   ├── SpeechRecognitionService.swift
-│   ├── NLPService.swift
-│   ├── NotificationService.swift
-│   └── PDFExportService.swift
-├── Utilities/
-│   └── Constants.swift           # App-wide constants and extensions
-├── DataModel.xcdatamodeld/       # Core Data model definition
-└── Assets.xcassets/              # App icons and colors
-```
+#### 👥 Student Management
+- Add and manage student accounts
+- View detailed student profiles
+- Track reading sessions and scores
+- Generate progress reports
 
-## Setup Instructions
+#### 📚 Content Management
+- Access grade-level appropriate texts
+- Filter by grade level (1-6)
+- Categorized reading materials
+- Built-in sample texts for immediate use
+
+## App Structure
+
+### Core Data Model
+
+**Student**
+- Personal profile (name, grade, language preferences)
+- Accessibility settings (font size, line spacing, background color)
+- Reading preferences (dyslexia font, TTS usage)
+
+**ReadingText**
+- Title, content, grade level
+- Original language and translations
+- Category classification
+- Associated comprehension questions
+
+**ReadingSession**
+- Tracks time spent reading
+- Records TTS and translation usage
+- Stores comprehension scores
+- Links to student and text
+
+**ComprehensionQuestion**
+- Multiple-choice questions
+- Correct answer and explanation
+- Linked to reading text
+
+**StudentAnswer**
+- Records student responses
+- Tracks correctness
+- Timestamps for analytics
+
+### Navigation Flow
+
+1. **Student Login** → Students select their profile
+2. **Text Library** → Browse and select reading materials
+3. **Reading View** → Read with TTS and translation support
+4. **Comprehension Check** → Answer questions about the text
+5. **Progress View** → See scores and achievements
+
+**Teacher Mode:**
+1. **Teacher Dashboard** → Overview of all students
+2. **Student Detail** → In-depth look at individual progress
+
+## Sample Reading Materials
+
+The app includes 4 pre-loaded stories across different grade levels:
+
+1. **The Helpful Dolphin** (Grade 2) - About kindness and helping others
+2. **The Magic Garden** (Grade 3) - About love and care
+3. **The Robot's First Day** (Grade 4) - About acceptance and friendship
+4. **The Mystery of the Missing Books** (Grade 5) - About problem-solving
+
+Each story includes:
+- English and Spanish versions
+- 3-4 comprehension questions
+- Explanations for correct answers
+
+## Technical Implementation
+
+### Services
+
+**TextToSpeechService**
+- AVFoundation-based speech synthesis
+- Sentence-by-sentence reading
+- Adjustable speech rate
+- Delegate-based progress tracking
+
+**PersistenceController**
+- Core Data stack management
+- Sample data seeding
+- Preview data for SwiftUI previews
+
+**SampleDataHelper**
+- Automatically loads sample texts on first launch
+- Creates grade-appropriate reading materials
+
+### Views
+
+- **StudentLoginView** - Colorful, welcoming login interface
+- **TextLibraryView** - Grid-based text browsing with filters
+- **ReadingView** - Accessible reading interface with TTS controls
+- **ComprehensionCheckView** - Question interface with immediate feedback
+- **StudentProgressView** - Stats and achievement display
+- **TeacherDashboardView** - Analytics and student management
+
+### Accessibility Features
+
+✓ VoiceOver support
+✓ Dynamic Type compatible
+✓ High contrast color options
+✓ Clear visual hierarchy
+✓ Large touch targets
+✓ Keyboard navigation support
+
+## Getting Started
 
 ### Prerequisites
-- Xcode 15.0+
-- iOS 17.0+ target device or simulator
-- Apple Developer account (for device testing)
+- Xcode 14.0 or later
+- iOS 16.0 or later
+- Swift 5.7 or later
 
 ### Installation
-1. **Clone or copy the project files** into the MindTalk directory
-2. **Open MindTalk.xcodeproj** in Xcode
-3. **Select your target device** or simulator
-4. **Build and run** the project (⌘+R)
 
-### First Launch Setup
-1. **Grant microphone permissions** when prompted
-2. **Grant speech recognition permissions** when prompted  
-3. **Enable notifications** for daily reminders (optional)
-4. **Complete your first check-in** to set up the experience
+1. Clone the repository
+2. Open `ReadWell.xcodeproj` in Xcode
+3. Build and run on simulator or device
 
-### Testing Features
-- **Speech Recognition**: Test with both clear and challenging audio
-- **Offline Mode**: Verify speech recognition works without internet
-- **Streak Logic**: Test with different check-in patterns
-- **Notifications**: Verify reminders appear at set times
-- **PDF Export**: Generate and share reports
+### First Launch
 
-## Key User Flows
+On first launch, the app will:
+1. Create a default student profile
+2. Load 4 sample reading texts
+3. Display the student login screen
 
-### Daily Check-in (First Time)
-1. **Welcome Screen**: Select energy level (0-10) and intent
-2. **5-Minute Session**: Speak freely with guided prompts
-3. **Auto-Processing**: Summary, emotions, and actions generated
-4. **Review Results**: Add reminders for actions if desired
+### Adding Students
 
-### Next-Day Reflection
-1. **Action Review**: Mark yesterday's actions as completed
-2. **Quick Reflection**: Optional notes on what helped/hindered
-3. **Streak Update**: Continue or reset based on completion
-4. **New Session**: Start today's check-in
+**Method 1: From Login Screen**
+1. Tap "Add New Student"
+2. Enter student name and grade level
+3. Select primary language
+4. Tap "Add Student"
 
-### Weekly Review (Sundays)
-1. **Analytics Dashboard**: View mood trends and completion rates
-2. **Top Themes**: See recurring topics from sessions
-3. **Next Week Focus**: Personalized recommendations
-4. **Export Option**: Generate PDF report for external use
+**Method 2: Teacher Dashboard**
+Teachers can view all students from the dashboard.
 
-## Privacy & Data
+## Usage Guide
 
-- **Local-Only Storage**: All data stored locally using Core Data
-- **No Cloud Sync**: Transcripts and personal data never leave the device
-- **Optional Export**: Users can choose to export PDF reports
-- **Offline Speech Recognition**: Works without internet connection
-- **Secure Processing**: All AI processing happens on-device
+### For Students
 
-## Customization Options
+1. **Select Your Profile** from the login screen
+2. **Choose a Story** from the library (filter by grade level)
+3. **Read the Text** using:
+   - Adjust font size and spacing via settings icon
+   - Toggle translation to see bilingual text
+   - Use play button for text-to-speech
+   - Adjust TTS speed with tortoise/hare buttons
+4. **Complete Reading** - Tap "Done Reading" when finished
+5. **Answer Questions** - Complete the comprehension check
+6. **View Your Progress** - See your score and history
 
-- **Daily reminder time**: Set preferred check-in time
-- **Notification preferences**: Enable/disable different notification types
-- **Intent categories**: Focus sessions on specific life areas
-- **Action reminder timing**: Smart parsing of time preferences
+### For Teachers
 
-## Performance Considerations
+1. **Access Dashboard** - Tap "Teacher Dashboard" from login
+2. **View Class Stats** - See overview of all students
+3. **Check Individual Progress** - Tap any student for details
+4. **Switch Back** - Use "Student View" button to return
 
-- **Optimized for 5-minute sessions**: Efficient memory and battery usage
-- **Background processing**: NLP analysis runs in background thread
-- **Cached results**: Avoid reprocessing of completed sessions
-- **Progressive loading**: Charts and analytics load incrementally
+## Customization
+
+### Reading Settings
+
+Students can customize:
+- **Font Size:** 14-32pt
+- **Line Spacing:** 1.0-3.0x
+- **Background:** Beige, Cream, White, or Light Blue
+
+Settings are automatically saved per student profile.
+
+### TTS Settings
+
+- **Speed Control:** 0.1x (slowest) to 1.0x (fastest)
+- **Default:** 0.5x (moderate pace)
+- Adjustable in real-time during reading
+
+## API Keys
+
+The app uses OpenAI for potential future features but currently works fully offline with local TTS.
+
+API keys are loaded from:
+1. Environment variables (`.env` file)
+2. `Config.plist` file
+3. System environment
+
+## Data Privacy
+
+- All data stored locally using Core Data
+- No cloud sync or external data transmission
+- Student data remains on device
+- FERPA and COPPA compliant design
 
 ## Future Enhancements
 
-The current implementation provides a solid MVP foundation. Potential future features:
+Potential additions:
+- [ ] Voice recording for reading fluency assessment
+- [ ] AI-powered reading difficulty analysis
+- [ ] Personalized text recommendations
+- [ ] Parent/guardian portal
+- [ ] Reading streak tracking
+- [ ] Gamification elements
+- [ ] Export progress reports as PDF
+- [ ] Custom text upload by teachers
+- [ ] Audio book support
+- [ ] Reading comprehension strategies overlay
 
-- **iCloud sync** for multi-device access
-- **Apple Watch companion** for quick check-ins
-- **Siri integration** for voice-activated sessions
-- **Advanced analytics** with machine learning insights
-- **Social features** for accountability partners
-- **Integration with health apps** (HealthKit, Apple Health)
+## Troubleshooting
 
-## Support & Troubleshooting
+### TTS Not Working
+- Check device volume
+- Ensure app has microphone permissions
+- Restart the app
 
-### Common Issues
-- **Microphone not working**: Check Settings > Privacy > Microphone
-- **Speech recognition poor**: Ensure quiet environment and clear speech
-- **Notifications not appearing**: Check Settings > Notifications > MindTalk
-- **App crashes on startup**: Reset and rebuild Core Data stack
+### Translations Not Showing
+- Verify text has translated content
+- Check language settings in student profile
 
-### Performance Tips
-- **Close other audio apps** during sessions
-- **Use wired headphones** for better audio quality
-- **Keep app updated** for latest improvements
-- **Restart app weekly** to clear temporary data
+### Progress Not Saving
+- Ensure app has proper storage permissions
+- Check available device storage
+
+## Credits
+
+Built with:
+- SwiftUI for modern, declarative UI
+- Core Data for local persistence
+- AVFoundation for text-to-speech
+- Swift 5.7+ features
 
 ## License
 
-This is a personal project created for educational and wellness purposes. The code structure and implementation can be used as reference for similar applications.
+This project is provided as-is for educational purposes.
+
+## Contact
+
+For questions or support, please reach out to the development team.
 
 ---
 
-**Built with ❤️ for daily mindfulness and personal growth**
+**Note:** This app is designed to support struggling readers and their educators with accessible, adaptive reading tools.

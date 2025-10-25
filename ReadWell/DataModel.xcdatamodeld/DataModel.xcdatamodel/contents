@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22522" systemVersion="23A344" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="ReadingText" representedClassName="ReadingText" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" optional="NO" attributeType="String"/>
+        <attribute name="content" optional="NO" attributeType="String"/>
+        <attribute name="gradeLevel" optional="NO" attributeType="Integer 16" defaultValue="3" usesScalarValueType="YES"/>
+        <attribute name="language" optional="NO" attributeType="String" defaultValue="en"/>
+        <attribute name="translationLanguage" optional="YES" attributeType="String"/>
+        <attribute name="translatedContent" optional="YES" attributeType="String"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="dateAdded" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="comprehensionQuestions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ComprehensionQuestion" inverseName="text" inverseEntity="ComprehensionQuestion"/>
+        <relationship name="readingSessions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ReadingSession" inverseName="text" inverseEntity="ReadingSession"/>
+    </entity>
+    <entity name="ComprehensionQuestion" representedClassName="ComprehensionQuestion" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="question" optional="NO" attributeType="String"/>
+        <attribute name="questionType" optional="NO" attributeType="String" defaultValue="multipleChoice"/>
+        <attribute name="options" optional="YES" attributeType="String"/>
+        <attribute name="correctAnswer" optional="NO" attributeType="String"/>
+        <attribute name="explanation" optional="YES" attributeType="String"/>
+        <attribute name="orderIndex" optional="NO" attributeType="Integer 16" defaultValue="0" usesScalarValueType="YES"/>
+        <relationship name="text" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ReadingText" inverseName="comprehensionQuestions" inverseEntity="ReadingText"/>
+        <relationship name="answers" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="StudentAnswer" inverseName="question" inverseEntity="StudentAnswer"/>
+    </entity>
+    <entity name="ReadingSession" representedClassName="ReadingSession" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="startDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="endDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="duration" optional="NO" attributeType="Double" defaultValue="0.0" usesScalarValueType="YES"/>
+        <attribute name="comprehensionScore" optional="YES" attributeType="Double" defaultValue="0.0" usesScalarValueType="YES"/>
+        <attribute name="readingSpeed" optional="NO" attributeType="Double" defaultValue="1.0" usesScalarValueType="YES"/>
+        <attribute name="usedTTS" optional="NO" attributeType="Boolean" defaultValue="NO" usesScalarValueType="YES"/>
+        <attribute name="usedTranslation" optional="NO" attributeType="Boolean" defaultValue="NO" usesScalarValueType="YES"/>
+        <attribute name="completedReading" optional="NO" attributeType="Boolean" defaultValue="NO" usesScalarValueType="YES"/>
+        <attribute name="oralReadingAccuracy" optional="YES" attributeType="Double" defaultValue="0.0" usesScalarValueType="YES"/>
+        <attribute name="wordsReadCorrectly" optional="YES" attributeType="Integer 16" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="wordsReadIncorrectly" optional="YES" attributeType="Integer 16" defaultValue="0" usesScalarValueType="YES"/>
+        <relationship name="text" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ReadingText" inverseName="readingSessions" inverseEntity="ReadingText"/>
+        <relationship name="student" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Student" inverseName="readingSessions" inverseEntity="Student"/>
+    </entity>
+    <entity name="Student" representedClassName="Student" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="username" optional="YES" attributeType="String"/>
+        <attribute name="passwordHash" optional="YES" attributeType="String"/>
+        <attribute name="gradeLevel" optional="NO" attributeType="Integer 16" defaultValue="3" usesScalarValueType="YES"/>
+        <attribute name="preferredLanguage" optional="NO" attributeType="String" defaultValue="en"/>
+        <attribute name="secondLanguage" optional="YES" attributeType="String"/>
+        <attribute name="useDyslexiaFont" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+        <attribute name="fontSize" optional="NO" attributeType="Integer 16" defaultValue="18" usesScalarValueType="YES"/>
+        <attribute name="lineSpacing" optional="NO" attributeType="Double" defaultValue="1.5" usesScalarValueType="YES"/>
+        <attribute name="backgroundColor" optional="NO" attributeType="String" defaultValue="beige"/>
+        <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="readingSessions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ReadingSession" inverseName="student" inverseEntity="ReadingSession"/>
+        <relationship name="answers" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="StudentAnswer" inverseName="student" inverseEntity="StudentAnswer"/>
+    </entity>
+    <entity name="StudentAnswer" representedClassName="StudentAnswer" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="answer" optional="NO" attributeType="String"/>
+        <attribute name="isCorrect" optional="NO" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="attemptNumber" optional="NO" attributeType="Integer 16" defaultValue="1" usesScalarValueType="YES"/>
+        <relationship name="question" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ComprehensionQuestion" inverseName="answers" inverseEntity="ComprehensionQuestion"/>
+        <relationship name="student" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Student" inverseName="answers" inverseEntity="Student"/>
+    </entity>
+    <entity name="Teacher" representedClassName="Teacher" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="username" optional="NO" attributeType="String"/>
+        <attribute name="passwordHash" optional="NO" attributeType="String"/>
+        <attribute name="schoolName" optional="YES" attributeType="String"/>
+        <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <entity name="TeacherSettings" representedClassName="TeacherSettings" syncable="YES" codeGenerationType="class">
+        <attribute name="teacherName" optional="YES" attributeType="String"/>
+        <attribute name="schoolName" optional="YES" attributeType="String"/>
+        <attribute name="defaultGradeLevel" optional="NO" attributeType="Integer 16" defaultValue="3" usesScalarValueType="YES"/>
+        <attribute name="enableAnalytics" optional="NO" attributeType="Boolean" defaultValue="YES" usesScalarValueType="YES"/>
+    </entity>
+</model>

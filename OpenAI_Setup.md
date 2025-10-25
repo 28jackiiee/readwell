@@ -1,12 +1,11 @@
-# OpenAI Integration Setup
+# OpenAI Integration Setup (Future Enhancement)
 
 ## Overview
-MindTalk now uses ChatGPT 4o with structured output to analyze your daily check-in sessions and provide:
-- Empathetic summaries
-- Core theme identification  
-- Emotion detection with intensity levels
-- SMART action items
-- Personal insights
+ReadWell can be enhanced with OpenAI integration for features such as:
+- Automated reading difficulty analysis
+- Personalized text recommendations
+- Custom question generation
+- Reading comprehension insights
 
 ## API Key Setup
 
@@ -18,10 +17,10 @@ export OPENAI_API_KEY="your_actual_api_key_here"
 ```
 
 ### Method 2: Config.plist File
-Edit `MindTalk/Utilities/Config.plist` and replace `your_openai_api_key_here` with your actual API key.
+Edit `ReadWell/Utilities/Config.plist` and replace `your_openai_api_key_here` with your actual API key.
 
 ### Method 3: .env File
-Create a `.env` file in the MindTalk folder:
+Create a `.env` file in the ReadWell folder:
 ```
 OPENAI_API_KEY=your_actual_api_key_here
 ```
@@ -33,22 +32,18 @@ OPENAI_API_KEY=your_actual_api_key_here
 3. Click "Create new secret key"
 4. Copy the key and use it in one of the methods above
 
-## How It Works
+## Potential Use Cases
 
-1. **Record Your Session**: Speak during your 5-minute check-in
-2. **AI Processing**: When you click "Finish", ChatGPT 4o analyzes your transcript
-3. **Structured Results**: The AI generates:
-   - Summary of your session
-   - Core themes identified
-   - Emotions detected (with intensity 0-10)
-   - Actionable items following SMART principles
-   - Personal insights and observations
+1. **Reading Level Analysis**: Analyze text complexity and suggest appropriate grade levels
+2. **Question Generation**: Automatically create comprehension questions for new texts
+3. **Personalization**: Generate reading recommendations based on student performance
+4. **Progress Insights**: AI-powered analysis of student reading patterns
 
-## Features
+## Features (When Implemented)
 
-- **Real-time Processing**: AI analysis happens immediately after your session
-- **Structured Output**: Consistent, parseable results every time
-- **Privacy**: Your transcript is sent to OpenAI for analysis but not stored there
+- **Real-time Analysis**: AI analysis of reading content and student performance
+- **Structured Output**: Consistent, parseable results for data integration
+- **Privacy First**: All data handling follows FERPA and COPPA guidelines
 - **Error Handling**: Graceful fallbacks if the API is unavailable
 - **Cost Efficient**: Uses GPT-4o which is optimized for structured output
 
@@ -64,9 +59,9 @@ GPT-4o pricing (as of 2024):
 - Input: $2.50 per 1M tokens
 - Output: $10.00 per 1M tokens
 
-Typical session analysis:
-- ~500 tokens input (your transcript)
-- ~300 tokens output (analysis)
-- Cost: ~$0.004 per session
+Typical text analysis:
+- ~500 tokens input (text content)
+- ~300 tokens output (analysis/questions)
+- Cost: ~$0.004 per analysis
 
-For daily use: ~$1.50 per year
+For frequent use: Cost varies by feature implementation
